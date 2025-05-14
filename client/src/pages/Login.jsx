@@ -18,14 +18,7 @@ export default function Login() {
     const handleSendOtp = async () => {
         setLoading(true);
         try {
-            await axios.post(`${backend_url}/auth/login`, { consumerId },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        token: localStorage.getItem('token'), // If applicable
-                    },
-                }
-            );
+            await axios.post(`${backend_url}/auth/login`, { consumerId });
             setOtpSent(true);
             setLoading(false);
         } catch (err) {
