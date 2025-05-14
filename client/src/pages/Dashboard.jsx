@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import generateReceiptPdf from "../utils/generateReceiptPdf";
 import { Banknote, Loader2 } from "lucide-react";
+import FullPageLoader from "../components/FullPageLoader"; // ✅ Import the loader
 
 export default function Dashboard() {
     const { token, timeLeft, logout } = useAuth();
@@ -13,27 +14,21 @@ export default function Dashboard() {
     const [tooltip, setTooltip] = useState("");
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true); // ✅
 
     const backend_url = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
-        const fetchUserData = async () => {
+        const fetchAllData = async () => {
             try {
-                const userRes = await axios.get(`${backend_url}/auth/me`, {
-                    headers: { token },
-                });
-                setUser(userRes.data);
-            } catch (err) {
-                console.error("Failed to fetch user data:", err);
-            }
-        };
+                const [userRes, canPayRes, historyRes] = await Promise.all([
+                    axios.get(`${backend_url}/auth/me`, { headers: { token } }),
+                    axios.post(`${backend_url}/payment/can-pay`, { token }),
+                    axios.get(`${backend_url}/payment/history`, { headers: { token } }),
+                ]);
 
-        const checkCanPay = async () => {
-            try {
-                const res = await axios.post(`${backend_url}/payment/can-pay`, {
-                    token,
-                });
-                setButtonDisabled(!res.data.canPay);
+                setUser(userRes.data);
+                setButtonDisabled(!canPayRes.data.canPay);
 
                 const now = new Date();
                 const currentMonth = now.getMonth();
@@ -44,29 +39,20 @@ export default function Dashboard() {
                         : now.toLocaleString("default", { month: "long" });
 
                 setTooltip(
-                    res.data.canPay
+                    canPayRes.data.canPay
                         ? ""
                         : `Payment button will activate after 1st ${displayMonth}`
                 );
+
+                setHistory(historyRes.data.history || []);
             } catch (err) {
-                console.error("Failed to check canPay:", err);
+                console.error("Failed to load dashboard data:", err);
+            } finally {
+                setInitialLoading(false); // ✅ stop loader
             }
         };
 
-        const fetchHistory = async () => {
-            try {
-                const res = await axios.get(`${backend_url}/payment/history`, {
-                    headers: { token },
-                });
-                setHistory(res.data.history || []);
-            } catch (err) {
-                console.error("Failed to fetch history:", err);
-            }
-        };
-
-        fetchUserData();
-        checkCanPay();
-        fetchHistory();
+        fetchAllData();
     }, [token, backend_url]);
 
     const handlePayment = async () => {
@@ -92,22 +78,22 @@ export default function Dashboard() {
                     );
                     setReceipt(verify.data.transaction);
                     setButtonDisabled(true);
-                    location.reload();
-                    // generateReceiptPdf(verify.data.transaction);
-                    const historyRes = await axios.get(`${backend_url}/payment/history`, {
-                        headers: { token },
-                    });
-                    setHistory(historyRes.data.history);
+                    location.reload(); // Refresh to reflect state
                 },
             };
 
             const rzp = new window.Razorpay(options);
             rzp.open();
-            setLoading(false);
         } catch (err) {
             console.error("Payment error:", err);
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (initialLoading) {
+        return <FullPageLoader message="Loading dashboard..." />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -158,35 +144,33 @@ export default function Dashboard() {
                 </div>
             )}
 
-            <div className="mb-6 flex items-center justify-center">
-                <button
-                    onClick={handlePayment}
-                    disabled={buttonDisabled || loading}
-                    title={tooltip} // Tooltip text
-                    className={`w-full sm:w-auto px-4 py-2 rounded text-white transition duration-200 flex items-center justify-center gap-2 ${buttonDisabled || loading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                        }`}
-                >
-                    {loading ? (
-                        <span className="flex items-center gap-2">
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            Processing...
-                        </span>
-                    ) : (
-                        <span className="flex items-center gap-2">
-                            {buttonDisabled ? (
-                                `${tooltip}`
-                            ) : (
-                                <>
+            {user?.role !== "admin" && (
+                <div className="mb-6 flex items-center justify-center">
+                    <button
+                        onClick={handlePayment}
+                        disabled={buttonDisabled || loading}
+                        title={tooltip}
+                        className={`w-full sm:w-auto px-4 py-2 rounded text-white transition duration-200 flex items-center justify-center gap-2 ${buttonDisabled || loading
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-green-600 hover:bg-green-700"
+                            }`}
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Processing...
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-2">
+                                {buttonDisabled ? tooltip : <>
                                     <Banknote className="w-5 h-5" />
                                     Pay Maintenance Fees
-                                </>
-                            )}
-                        </span>
-                    )}
-                </button>
-            </div>
+                                </>}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            )}
 
             <div className="bg-white shadow p-4 rounded border overflow-x-auto">
                 <h2 className="text-lg font-semibold mb-4">Transaction History</h2>
@@ -215,7 +199,7 @@ export default function Dashboard() {
                                             onClick={() => generateReceiptPdf(txn)}
                                             className="text-blue-600 hover:underline text-sm"
                                         >
-                                            Download
+                                            Download Receipt
                                         </button>
                                     </td>
                                 </tr>

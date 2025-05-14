@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import FullPageLoader from '../components/FullPageLoader';
 
 const AdminDashboard = () => {
     const { logout } = useAuth();
     const [transactions, setTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
     const token = localStorage.getItem('token');
 
     const backend_url = import.meta.env.VITE_BACKEND_URL
@@ -18,11 +20,17 @@ const AdminDashboard = () => {
                 setTransactions(res.data.transactions);
             } catch (err) {
                 console.error('Error fetching transactions:', err);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchTransactions();
     }, [token, backend_url]);
+
+    if (loading) {
+        return <FullPageLoader message="Fetching transactions..." />;
+    }
 
     return (
         <div className="p-4 md:p-8 bg-gray-50 min-h-screen">

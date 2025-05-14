@@ -15,6 +15,21 @@ export default function Login() {
 
     const backend_url = import.meta.env.VITE_BACKEND_URL;
 
+    const token = localStorage.getItem("token");
+    if (token) {
+        try {
+            const decoded = jwtDecode(token);
+            if (decoded?.role === "admin") {
+                navigate("/admin");
+            } else {
+                navigate("/dashboard");
+            }
+        } catch (err) {
+            console.log(err)
+            localStorage.removeItem("token"); // cleanup bad token
+        }
+    }
+
     const handleSendOtp = async () => {
         setLoading(true);
         try {
@@ -23,6 +38,7 @@ export default function Login() {
             setLoading(false);
         } catch (err) {
             alert(err.response?.data?.message || "Error sending OTP");
+            setLoading(false);
         }
     };
 
@@ -45,6 +61,7 @@ export default function Login() {
             setLoading(false);
         } catch (err) {
             alert(err.response?.data?.message || "Error verifying OTP");
+            setLoading(false);
         }
     };
 
@@ -57,8 +74,9 @@ export default function Login() {
                 <input
                     type="text"
                     placeholder="Consumer ID"
-                    className="w-full border p-2 mb-4"
+                    className="w-full disabled:cursor-not-allowed border p-2 mb-4"
                     value={consumerId}
+                    disabled={otpSent || loading}
                     onChange={(e) => setConsumerId(e.target.value)}
                 />
                 {otpSent && (
