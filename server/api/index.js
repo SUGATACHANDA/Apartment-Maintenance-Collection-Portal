@@ -10,7 +10,15 @@ const adminRoutes = require('../routes/admin');
 
 const app = express();
 
-app.use(cors());
+// Allow specific origin
+const corsOptions = {
+    origin: 'https://adyamandirapartment.vercel.app', // Frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    credentials: true, // Allow cookies if needed
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI, {
