@@ -14,11 +14,12 @@ const app = express();
 const corsOptions = {
     origin: 'https://adyamandirapartment.vercel.app', // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Include 'token' header
     credentials: true, // Allow cookies if needed
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight requests
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI, {
