@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export default function generateReceiptPdf(transaction) {
+export default async function generateReceiptPdf(transaction) {
     function getMonthName(dateInput) {
         try {
             const date = new Date(dateInput);
@@ -14,23 +14,20 @@ export default function generateReceiptPdf(transaction) {
     }
 
     const billMonth = getMonthName(transaction.date);
-    // Use unit: 'pt' for precise height calculation
-    const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: "landscape" });
+    const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
 
     const pageWidth = doc.internal.pageSize.getWidth();
-    const centerX = pageWidth / 2;
     let y = 40;
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
-    doc.text('ADYA MANDIR APARTMENT SOCIETY', centerX, y, { align: 'center' });
+    doc.text('ADYA MANDIR APARTMENT SOCIETY', pageWidth / 2, y, { align: 'center' });
 
     y += 25;
     doc.setFontSize(12);
-    doc.text(`Transaction Receipt for the month of ${billMonth}`, centerX, y, { align: 'center' });
+    doc.text(`Transaction Receipt for the month of ${billMonth}`, pageWidth / 2, y, { align: 'center' });
 
     y += 30;
-
 
     const tableBody = [
         ['Transaction ID', transaction.transactionId || ''],
@@ -61,13 +58,39 @@ export default function generateReceiptPdf(transaction) {
         tableWidth: 'auto',
     });
 
-    const finalY = doc.lastAutoTable.finalY + 30;
+    // Signature & label
+    const signatureImageUrl = '/signature.png'; // must be in public folder
+    const signatureImage = await fetch(signatureImageUrl)
+        .then(res => res.blob())
+        .then(blob => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        });
+
+    const signatureWidth = 100;
+    const signatureHeight = 40;
+    const imageY = doc.lastAutoTable.finalY + 40;
+    const rightX = pageWidth - 80 - signatureWidth; // right-aligned with 80px margin
+
+    doc.addImage(signatureImage, 'PNG', rightX, imageY, signatureWidth, signatureHeight);
+
     doc.setFontSize(9);
+    doc.setTextColor(120); // grey
     doc.setFont('helvetica', 'normal');
+    doc.text('Authorized Signatory', rightX + signatureWidth / 2, imageY + signatureHeight + 12, {
+        align: 'center',
+    });
+
+    // Disclaimer centered
+    doc.setFontSize(9);
+    doc.setTextColor(0);
     doc.text(
         '* This is an electronically generated receipt. No signature is required. For any discrepancies, please contact support within 7 days.',
-        centerX,
-        finalY,
+        pageWidth / 2,
+        imageY + signatureHeight + 40,
         { align: 'center' }
     );
 
