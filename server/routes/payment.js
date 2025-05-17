@@ -91,7 +91,7 @@ router.post('/can-pay', async (req, res) => {
             new Date(user.lastPaidAt).getMonth() === today.getMonth() &&
             new Date(user.lastPaidAt).getFullYear() === today.getFullYear();
 
-        if (!alreadyPaid && day >= 5) {
+        if (!alreadyPaid && day >= 1) {
             return res.json({ canPay: true });
         }
 
