@@ -34,7 +34,7 @@ export default function Dashboard() {
                 const currentMonth = now.getMonth();
                 const nextMonth = new Date(now.getFullYear(), currentMonth + 1, 1);
                 const displayMonth =
-                    now.getDate() >= 5
+                    now.getDate() >= 1
                         ? nextMonth.toLocaleString("default", { month: "long" })
                         : now.toLocaleString("default", { month: "long" });
 
