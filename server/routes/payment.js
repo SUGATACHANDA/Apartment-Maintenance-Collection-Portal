@@ -95,7 +95,7 @@ router.post('/can-pay', async (req, res) => {
         lastPaidDate.getFullYear() === todayYear;
     }
 
-    const canPay = !alreadyPaid && today.getDate() >= 1;
+    const canPay = !alreadyPaid && today.getDate() >= 2;
 
     res.json({ canPay });
   } catch (err) {
