@@ -33,14 +33,14 @@ export default function Dashboard() {
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         const displayMonth =
-          now.getDate() >= 1
+          now.getDate() >= 2
             ? nextMonth.toLocaleString("default", { month: "long" })
             : now.toLocaleString("default", { month: "long" });
 
         setTooltip(
           canPayRes.data.canPay
             ? ""
-            : `Payment button will activate after 1st ${displayMonth}`
+            : `Payment button will activate after 2nd ${displayMonth}`
         );
 
         setHistory(historyRes.data.history || []);
