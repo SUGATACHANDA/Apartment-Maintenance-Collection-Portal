@@ -8,7 +8,7 @@ const Transaction = require('../models/Transaction');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 // Create Razorpay order
@@ -21,7 +21,7 @@ router.post('/create-order', async (req, res) => {
     const order = await razorpay.orders.create({
       amount: user.maintenanceAmount * 100,
       currency: 'INR',
-      receipt: `rcpt_${consumerId}_${Date.now()}`
+      receipt: `rcpt_${consumerId}_${Date.now()}`,
     });
 
     res.json({ orderId: order.id, amount: order.amount, currency: order.currency });
@@ -56,7 +56,7 @@ router.post('/verify-payment', async (req, res) => {
       consumerId,
       email: user.email,
       amount: user.maintenanceAmount,
-      date: transactionDate
+      date: transactionDate,
     });
 
     res.json({
@@ -67,7 +67,7 @@ router.post('/verify-payment', async (req, res) => {
         email: transaction.email,
         date: transactionDate.toLocaleString('en-IN'),
         amount: transaction.amount,
-      }
+      },
     });
   } catch (err) {
     console.error('Verification failed:', err);
@@ -75,14 +75,14 @@ router.post('/verify-payment', async (req, res) => {
   }
 });
 
-// ✅ FIXED: Check if user can pay on or after 1st of the month
+// ✅ Check if user is eligible to pay (no overrideDate support)
 router.post('/can-pay', async (req, res) => {
   try {
-    const { token, overrideDate } = req.body;
+    const { token } = req.body;
     const { consumerId } = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ consumerId });
 
-    const today = overrideDate ? new Date(overrideDate) : new Date();
+    const today = new Date();
     const todayMonth = today.getMonth();
     const todayYear = today.getFullYear();
 
@@ -90,10 +90,9 @@ router.post('/can-pay', async (req, res) => {
 
     if (user.lastPaidAt) {
       const lastPaidDate = new Date(user.lastPaidAt);
-      const paidMonth = lastPaidDate.getMonth();
-      const paidYear = lastPaidDate.getFullYear();
-
-      alreadyPaid = paidMonth === todayMonth && paidYear === todayYear;
+      alreadyPaid =
+        lastPaidDate.getMonth() === todayMonth &&
+        lastPaidDate.getFullYear() === todayYear;
     }
 
     const canPay = !alreadyPaid && today.getDate() >= 1;
@@ -105,14 +104,12 @@ router.post('/can-pay', async (req, res) => {
   }
 });
 
-// Fetch user transaction history
+// Transaction history
 router.get('/history', async (req, res) => {
   try {
     const token = req.headers.token;
     const { consumerId } = jwt.verify(token, process.env.JWT_SECRET);
-
     const history = await Transaction.find({ consumerId }).sort({ date: -1 });
-
     res.json({ history });
   } catch (err) {
     console.error('Error fetching history:', err);
