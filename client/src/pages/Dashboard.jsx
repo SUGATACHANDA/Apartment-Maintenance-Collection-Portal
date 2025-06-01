@@ -32,9 +32,10 @@ export default function Dashboard() {
 
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        const displayMonth = now.getDate() >= 1
-          ? nextMonth.toLocaleString("default", { month: "long" })
-          : now.toLocaleString("default", { month: "long" });
+        const displayMonth =
+          now.getDate() >= 1
+            ? nextMonth.toLocaleString("default", { month: "long" })
+            : now.toLocaleString("default", { month: "long" });
 
         setTooltip(
           canPayRes.data.canPay
@@ -71,7 +72,7 @@ export default function Dashboard() {
           });
           setReceipt(verify.data.transaction);
           setButtonDisabled(true);
-          location.reload(); // reload to update state
+          location.reload(); // reload to reflect changes
         },
       };
 
