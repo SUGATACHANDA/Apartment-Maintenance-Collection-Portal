@@ -12,14 +12,13 @@ const AdminDashboard = () => {
     const [form, setForm] = useState({});
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [transactions, setTransactions] = useState([]);
+    const [loadingTransactions, setLoadingTransactions] = useState(false);
     const token = localStorage.getItem('token');
-
-    const backend_url = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await axios.get(`${backend_url}/admin/all-users`, {
+                const res = await axios.get('http://localhost:5000/api/admin/all-users', {
                     headers: { token },
                 });
                 setUsers(res.data.users);
@@ -30,16 +29,19 @@ const AdminDashboard = () => {
             }
         };
         fetchUsers();
-    }, [token, backend_url]);
+    }, [token]);
 
     const fetchUserTransactions = async (consumerId) => {
         try {
-            const res = await axios.get(`${backend_url}/admin/user-transactions/${consumerId}`, {
+            setLoadingTransactions(true);
+            const res = await axios.get(`http://localhost:5000/api/admin/user-transactions/${consumerId}`, {
                 headers: { token },
             });
             setTransactions(res.data.transactions);
         } catch (err) {
             console.error('Error fetching transactions:', err);
+        } finally {
+            setLoadingTransactions(false);
         }
     };
 
@@ -60,7 +62,7 @@ const AdminDashboard = () => {
 
     const saveUser = async () => {
         try {
-            await axios.put(`${backend_url}/admin/update-user/${editingUser}`, form, {
+            await axios.put(`http://localhost:5000/api/admin/update-user/${editingUser}`, form, {
                 headers: { token },
             });
             const updatedUsers = users.map((u) => (u._id === editingUser ? form : u));
@@ -149,7 +151,9 @@ const AdminDashboard = () => {
             {selectedUserId && (
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Recent Transactions for Consumer ID: {selectedUserId}</h2>
-                    {transactions.length === 0 ? (
+                    {loadingTransactions ? (
+                        <p className="text-blue-600">Loading transactions...</p>
+                    ) : transactions.length === 0 ? (
                         <p className="text-gray-500 italic">No transactions found.</p>
                     ) : (
                         <table className="min-w-full table-auto text-sm text-left text-gray-700">
