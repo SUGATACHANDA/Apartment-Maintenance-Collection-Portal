@@ -142,7 +142,7 @@ const AdminDashboard = () => {
                                         <td className="px-4 py-2 capitalize">{user.role}</td>
                                         <td className="px-4 py-2 flex flex-wrap gap-2">
                                             <button onClick={() => startEdit(user)} className="text-blue-600 hover:underline">Edit</button>
-                                            <button onClick={() => { setSelectedUserId(user.consumerId); fetchUserTransactions(user.consumerId); }} className="text-indigo-600 hover:underline">View Transactions</button>
+                                            <button onClick={() => { setSelectedUserId(user.consumerId); fetchUserTransactions(user.consumerId); }} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">View Transactions</button>
                                         </td>
                                     </>
                                 )}
