@@ -31,9 +31,10 @@ export default function Dashboard() {
         setButtonDisabled(!canPayRes.data.canPay);
 
         const now = new Date();
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const currentMonth = now.getMonth();
+        const nextMonth = new Date(now.getFullYear(), currentMonth + 1, 1);
         const displayMonth =
-          now.getDate() >= 1
+          now.getDate() >= 5
             ? nextMonth.toLocaleString("default", { month: "long" })
             : now.toLocaleString("default", { month: "long" });
 
@@ -129,11 +130,10 @@ export default function Dashboard() {
             onClick={handlePayment}
             disabled={buttonDisabled || loading}
             title={tooltip}
-            className={`w-full sm:w-auto px-4 py-2 rounded text-white transition duration-200 flex items-center justify-center gap-2 ${
-              buttonDisabled || loading
+            className={`w-full sm:w-auto px-4 py-2 rounded text-white transition duration-200 flex items-center justify-center gap-2 ${buttonDisabled || loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-green-600 hover:bg-green-700"
-            }`}
+              }`}
           >
             {loading ? (
               <span className="flex items-center gap-2">

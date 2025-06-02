@@ -86,16 +86,14 @@ router.post('/can-pay', async (req, res) => {
     const todayMonth = today.getMonth();
     const todayYear = today.getFullYear();
 
-    let alreadyPaid = false;
+    const alreadyPaid =
+      user.lastPaidAt &&
+      new Date(user.lastPaidAt).getMonth() === today.getMonth() &&
+      new Date(user.lastPaidAt).getFullYear() === today.getFullYear();
 
-    if (user.lastPaidAt) {
-      const lastPaidDate = new Date(user.lastPaidAt);
-      alreadyPaid =
-        lastPaidDate.getMonth() === todayMonth &&
-        lastPaidDate.getFullYear() === todayYear;
+    if (!alreadyPaid && day >= 5) {
+      return res.json({ canPay: true });
     }
-
-    const canPay = !alreadyPaid && today.getDate() >= 1;
 
     res.json({ canPay });
   } catch (err) {
