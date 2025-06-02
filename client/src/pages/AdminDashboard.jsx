@@ -14,11 +14,12 @@ const AdminDashboard = () => {
     const [transactions, setTransactions] = useState([]);
     const [loadingTransactions, setLoadingTransactions] = useState(false);
     const token = localStorage.getItem('token');
+    const backend_url = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/admin/all-users', {
+                const res = await axios.get(`${backend_url}/admin/all-users`, {
                     headers: { token },
                 });
                 setUsers(res.data.users);
@@ -29,12 +30,12 @@ const AdminDashboard = () => {
             }
         };
         fetchUsers();
-    }, [token]);
+    }, [token, backend_url]);
 
     const fetchUserTransactions = async (consumerId) => {
         try {
             setLoadingTransactions(true);
-            const res = await axios.get(`http://localhost:5000/api/admin/user-transactions/${consumerId}`, {
+            const res = await axios.get(`${backend_url}/admin/user-transactions/${consumerId}`, {
                 headers: { token },
             });
             setTransactions(res.data.transactions);
@@ -62,7 +63,7 @@ const AdminDashboard = () => {
 
     const saveUser = async () => {
         try {
-            await axios.put(`http://localhost:5000/api/admin/update-user/${editingUser}`, form, {
+            await axios.put(`${backend_url}/admin/update-user/${editingUser}`, form, {
                 headers: { token },
             });
             const updatedUsers = users.map((u) => (u._id === editingUser ? form : u));
@@ -79,7 +80,10 @@ const AdminDashboard = () => {
         <div className="p-6 bg-gray-50 min-h-screen font-sans">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
                 <h1 className="text-3xl font-extrabold text-gray-800">Admin Dashboard</h1>
-                <button onClick={logout} className="mt-2 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                <button
+                    onClick={logout}
+                    className="mt-2 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                >
                     Logout
                 </button>
             </div>
