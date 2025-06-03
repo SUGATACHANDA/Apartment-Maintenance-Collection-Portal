@@ -85,22 +85,22 @@ router.post('/can-pay', async (req, res) => {
     const today = new Date();
     const todayMonth = today.getMonth();
     const todayYear = today.getFullYear();
+    const day = today.getDate(); // ✅ define the 'day'
 
     const alreadyPaid =
       user.lastPaidAt &&
-      new Date(user.lastPaidAt).getMonth() === today.getMonth() &&
-      new Date(user.lastPaidAt).getFullYear() === today.getFullYear();
+      new Date(user.lastPaidAt).getMonth() === todayMonth &&
+      new Date(user.lastPaidAt).getFullYear() === todayYear;
 
-    if (!alreadyPaid && day >= 5) {
-      return res.json({ canPay: true });
-    }
+    const canPay = !alreadyPaid && day >= 1;
 
-    res.json({ canPay });
+    return res.json({ canPay });
   } catch (err) {
     console.error('Can-pay check failed:', err);
     res.status(400).json({ message: 'Invalid token or server error' });
   }
 });
+
 
 // Transaction history
 router.get('/history', async (req, res) => {
