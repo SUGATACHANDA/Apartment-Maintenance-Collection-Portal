@@ -85,6 +85,7 @@ export default function Login() {
                         placeholder="Enter OTP"
                         className="w-full border p-2 mb-4"
                         value={otp}
+                        max={6}
                         onChange={(e) => setOtp(e.target.value)}
                     />
                 )}

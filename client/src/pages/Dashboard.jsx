@@ -31,22 +31,20 @@ export default function Dashboard() {
         setButtonDisabled(!canPayRes.data.canPay);
 
         const now = new Date();
-        const currentMonth = now.getMonth();
-        const nextMonth = new Date(now.getFullYear(), currentMonth + 1, 1);
         const displayMonth =
-          now.getDate() >= 5
-            ? nextMonth.toLocaleString("default", { month: "long" })
-            : now.toLocaleString("default", { month: "long" });
+          now.getDate() < 1
+            ? now.toLocaleString('default', { month: 'long' })
+            : new Date(now.getFullYear(), now.getMonth() + 1).toLocaleString('default', { month: 'long' });
 
         setTooltip(
           canPayRes.data.canPay
-            ? ""
+            ? ''
             : `Payment button will activate after 1st ${displayMonth}`
         );
 
         setHistory(historyRes.data.history || []);
       } catch (err) {
-        console.error("Failed to load dashboard data:", err);
+        console.error('Failed to load dashboard data:', err);
       } finally {
         setInitialLoading(false);
       }
@@ -54,6 +52,7 @@ export default function Dashboard() {
 
     fetchAllData();
   }, [token, backend_url]);
+
 
   const handlePayment = async () => {
     setLoading(true);
@@ -131,8 +130,8 @@ export default function Dashboard() {
             disabled={buttonDisabled || loading}
             title={tooltip}
             className={`w-full sm:w-auto px-4 py-2 rounded text-white transition duration-200 flex items-center justify-center gap-2 ${buttonDisabled || loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700"
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
               }`}
           >
             {loading ? (

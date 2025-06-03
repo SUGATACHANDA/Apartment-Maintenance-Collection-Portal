@@ -141,8 +141,8 @@ const AdminDashboard = () => {
                                         <td className="px-4 py-2">₹{user.maintenanceAmount}</td>
                                         <td className="px-4 py-2 capitalize">{user.role}</td>
                                         <td className="px-4 py-2 flex flex-wrap gap-2">
-                                            <button onClick={() => startEdit(user)} className="text-blue-600 hover:underline">Edit</button>
-                                            <button onClick={() => { setSelectedUserId(user.consumerId); fetchUserTransactions(user.consumerId); }} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">View Transactions</button>
+                                            <button onClick={() => startEdit(user)} className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition">Edit</button>
+                                            <button onClick={() => { setSelectedUserId(user.consumerId); fetchUserTransactions(user.consumerId); }} className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition">View Transactions</button>
                                         </td>
                                     </>
                                 )}
@@ -153,7 +153,7 @@ const AdminDashboard = () => {
             </div>
 
             {selectedUserId && (
-                <div className="bg-white p-6 rounded-xl shadow-lg">
+                <div className="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Recent Transactions for Consumer ID: {selectedUserId}</h2>
                     {loadingTransactions ? (
                         <p className="text-blue-600">Loading transactions...</p>
